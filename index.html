@@ -36,6 +36,12 @@ h2 span { display:block; margin:0 0 6px; color:var(--accent); font-size:clamp(20
 h3 { margin:0 0 12px; font-size:19px; line-height:1.5; color:var(--accent); }
 h3 span { display:inline-flex; width:28px; height:28px; align-items:center; justify-content:center; margin-right:8px; border-radius:50%; background:#edf1ec; font-size:14px; }
 p { font-size:var(--fs); line-height:var(--leading); letter-spacing:.018em; margin:0 0 1.12em; }
+
+.sentence { cursor:pointer; border-radius:.24em; padding:.02em .03em; transition:background-color .16s ease, color .16s ease; }
+.sentence:hover { background:rgba(37,99,235,.08); }
+.sentence.mark-blue { color:#1d4ed8; background:rgba(37,99,235,.10); }
+.sentence.mark-red { color:#b91c1c; background:rgba(185,28,28,.10); }
+@media (hover:none) { .sentence:hover { background:transparent; } .sentence:active { background:rgba(37,99,235,.12); } .sentence.mark-blue { background:rgba(37,99,235,.10); } .sentence.mark-red { background:rgba(185,28,28,.10); } }
 @media (min-width: 861px) and (max-width: 1120px) {
   :root { --measure:52rem; }
   .layout { display:block; padding:16px 22px 72px; }
@@ -549,6 +555,35 @@ applySize(fs);
 document.getElementById('larger').onclick=()=>applySize(fs+1);
 document.getElementById('smaller').onclick=()=>applySize(fs-1);
 sizeRange.addEventListener('input',e=>applySize(e.target.value));
+function sentenceTextParts(text){
+  return text.match(/[^。]+。(?:[」』）)\]】])?|[^。]+$/g) || [];
+}
+function wrapSentences(){
+  document.querySelectorAll('main p').forEach(p=>{
+    const text=p.textContent.replace(/\s+/g,' ').trim();
+    if(!text) return;
+    p.innerHTML='';
+    sentenceTextParts(text).forEach(part=>{
+      const span=document.createElement('span');
+      span.className='sentence';
+      span.textContent=part;
+      p.appendChild(span);
+    });
+  });
+}
+wrapSentences();
+document.addEventListener('click',e=>{
+  const sentence=e.target.closest('.sentence');
+  if(!sentence) return;
+  if(!sentence.classList.contains('mark-blue') && !sentence.classList.contains('mark-red')){
+    sentence.classList.add('mark-blue');
+  }else if(sentence.classList.contains('mark-blue')){
+    sentence.classList.remove('mark-blue');
+    sentence.classList.add('mark-red');
+  }else{
+    sentence.classList.remove('mark-red');
+  }
+});
 const links=[...document.querySelectorAll('.navItem')], topics=[...document.querySelectorAll('.topic')];
 const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-20% 0px -70% 0px',threshold:0});
 topics.forEach(t=>io.observe(t));
